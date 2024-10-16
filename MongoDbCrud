@@ -1,0 +1,32 @@
+const { MongoClient } = require('mongodb');
+
+const uri = "mongodb://localhost:27017";
+const client = new MongoClient(uri);
+
+async function run() {
+    try {
+        await client.connect();
+
+        const database = client.db('testDB');
+        const collection = database.collection('testCollection');
+
+        const doc = { name: "John Doe", age: 30, profession: "Engineer" };
+        const result = await collection.insertOne(doc);
+        console.log(`Document inserted with _id: ${result.insertedId}`);
+
+        const query = { name: "John Doe" };
+        const user = await collection.findOne(query);
+        console.log("Document found:", user);
+
+        const update = { $set: { age: 31 } };
+        const updateResult = await collection.updateOne(query, update);
+        console.log(`Document updated, matched: ${updateResult.matchedCount}, modified: ${updateResult.modifiedCount}`);
+
+        const deleteResult = await collection.deleteOne(query);
+        console.log(`Document deleted, count: ${deleteResult.deletedCount}`);
+    } finally {
+        await client.close();
+    }
+}
+
+run().catch(console.dir);
